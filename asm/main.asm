@@ -35,7 +35,7 @@ right:
 
 
 wait:
-	ldi r20, 4
+	ldi r20, 20
 	ldi r21, 200
 	ldi r22, 200
 loop1:
