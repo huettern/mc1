@@ -18,8 +18,8 @@ init:
 	ldi r16, 0b00000001
 	out PORTA, r16
 	; PortA 2,3 input pull enable
-	sbi PORTA, 2
-	sbi PORTA, 3
+	sbi PORTA, 4
+	sbi PORTA, 5
 
 	; init stack pointer
 	ldi r16, high(RAMEND)
@@ -33,6 +33,8 @@ init:
 main:
 	call wait
 	in r16, PINA
+	ror r16
+	ror r16
 	ror r16
 	ror r16
 	ldi r17, 0x01

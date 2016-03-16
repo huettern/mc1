@@ -1,9 +1,9 @@
 # makefile
 A=./avra
-TTY=/dev/ttyACM0
+TTY=/dev/ttyS0
 
 TargetDir=./
-TargetName=main3
+TargetName=main4
 
 all: $(TargetName).hex
 
