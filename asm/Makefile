@@ -3,7 +3,7 @@ A=./avra
 TTY=/dev/ttyS0
 
 TargetDir=./
-TargetName=main4
+TargetName=p1
 
 all: $(TargetName).hex
 
