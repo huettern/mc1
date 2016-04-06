@@ -3,7 +3,7 @@ A=./avra
 TTY=/dev/ttyS0
 
 TargetDir=./
-TargetName=p1
+TargetName=huetter_noah_p1
 
 all: $(TargetName).hex
 
