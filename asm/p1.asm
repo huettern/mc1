@@ -82,6 +82,7 @@ init:
 	ldi r16,0x00
 	sts TCCR1C,r16	;Timer 0 Control 
 	
+	;Timer1 init
 	ldi r16,0x00
 	sts TCNT1H,r16	;Timer count Register set to 0
 	sts TCNT1L,r16	;Timer count Register set to 0
@@ -134,12 +135,14 @@ ISR_Timer1_Capt:
 	reti
 
 ISR_Timer1_CompA:
+	;push r16
 	in r16, PORTC
 	inc r16
 	out PORTC, r16
 	ldi r17, 0
 	sts TCNT1L, r17
 	sts TCNT1H, r17
+	;pop r16
 	reti
 
 ISR_Timer1_CompB:
