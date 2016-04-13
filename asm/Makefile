@@ -1,6 +1,6 @@
 # makefile
 A=./avra
-TTY=/dev/ttyS0
+TTY=/dev/ttyACM0
 
 TargetDir=./
 TargetName=huetter_noah_p1
