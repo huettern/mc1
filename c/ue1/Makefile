@@ -25,7 +25,7 @@ ADUDE_PROT = wiring
 
 CFLAGS = -mmcu=$(MCU) -Wall -O2 -DF_CPU=16000000UL -gdwarf-2 
 
-all: $(PROJECT).elf flash
+all: $(PROJECT).elf flash size
 
 # use different rule if assembler project source file '$(PROJECT).s' exists...
 ifeq ($(PROJECT).s,$(wildcard $(PROJECT).s))
@@ -49,12 +49,14 @@ endif
 
 flash: $(PROJECT).hex  $(ADUDE_IF)
 	avrdude -F -c $(ADUDE_PROT) -p $(MCU) -P $(ADUDE_IF) -b $(ADUDE_BAUD) -U flash:w:$(PROJECT).hex:i
-
+	
+size: $(PROJECT).elf
+	avr-size -C --mcu=$(MCU) $(PROJECT).elf
 
 clean:
 	rm -f $(PROJECT).dis $(PROJECT).elf $(PROJECT).hex 
 
-.PHONY: clean flash
+.PHONY: clean flash size
 
 
 # 

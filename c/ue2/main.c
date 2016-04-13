@@ -148,3 +148,12 @@ unsigned char readButtons ()
 
 	return buttons;
 }
+
+unsigned char fakultaet_rekursiv(unsigned char i)
+{
+	while(i>1)
+	{
+		i*=(i-1);
+		i=fakultaet_rekursiv(i);
+	}
+}
