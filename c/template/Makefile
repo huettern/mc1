@@ -5,7 +5,7 @@
 PROJECT=main
 
 
-OBJS = $(PROJECT).o ../lcd_keypad_m2560/lcd_keypad_m2560.o
+OBJS = $(PROJECT).o ../lcd_keypad_m2560/lcd_keypad_m2560.o ../lcd_keypad_m2560/lcd_keys.o
 
 CC = avr-gcc
 # Fedora 23 avr-libc is broken - use avr-gcc from Fedora 22 mounted on ~/x
@@ -13,7 +13,7 @@ CC = avr-gcc
 
 # for Arduino Mega2560
 MCU = atmega2560	# must be lower case!!
-ADUDE_IF = /dev/ttyACM0
+ADUDE_IF = /dev/ttyS0
 ADUDE_BAUD = 115200
 ADUDE_PROT = wiring
 
