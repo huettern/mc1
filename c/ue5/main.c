@@ -40,6 +40,7 @@ volatile static char update = 0;
 //
 int main()
 {	
+	static char s[] = "Hello";
 	static FILE fd_stdout= FDEV_SETUP_STREAM(serial_putchar, NULL, _FDEV_SETUP_WRITE);
 	stdout = &fd_stdout;
 	static FILE fd_lcdout= FDEV_SETUP_STREAM(lcd_putchar, NULL, _FDEV_SETUP_WRITE);
@@ -52,21 +53,20 @@ int main()
 
 	initTimer();
 
-//	fprintf(LCD, "42 is the answer");
+	//fprintf(LCD, "42 is the answer");
 
 	hours = 9;
 	minutes = 38;
 	seconds = 0;
 
-	sei();
+	//sei();
 
+	s[5]='!';
+	s[6]='o';
+	fprintf(LCD,"%s", s);
 
 	while(1){
-		if(update)
-		{
-			fprintf(LCD, "\nTime: %02d:%02d:%02d",hours,minutes,seconds);
-			update = 0;
-		}
+		
  	}
 }
 

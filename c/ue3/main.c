@@ -24,6 +24,7 @@
 void inti_send_buf();
 int serial_putchar(char ch, FILE *unused);
 void initIO ();
+long getADCBlocking();
 
 
 //================================================================================
@@ -32,6 +33,9 @@ void initIO ();
 //
 int main()
 {	
+	long volts;
+	int high;
+	int low;
 	enum LCD_KEY enLcdKey = 0;
 	static FILE fd_stdout= FDEV_SETUP_STREAM(serial_putchar, NULL, _FDEV_SETUP_WRITE);
 	stdout = &fd_stdout;
@@ -77,6 +81,12 @@ int main()
 			fprintf(LCD, "N" );
 		}
 
+		fprintf(LCD, "\r" );
+
+		volts = getADCBlocking();
+		high = volts/1000;
+		low = volts%1000;
+		fprintf(LCD, "U=%d.%03dV", high, low );
 		_delay_ms(200);
 		fprintf(LCD, "\n" );
 
@@ -122,4 +132,14 @@ int serial_putchar(char ch, FILE *unused)
 void initIO () 
 {
 	DDRC = 0xff;
+}
+
+
+long getADCBlocking()
+{
+	ADCSRA|=1<<ADSC; //Read
+
+	while((ADCSRA>>ADSC)&1); //Wait
+
+	return (long)ADC * 5000 / 1024;
 }
