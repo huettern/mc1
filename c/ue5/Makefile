@@ -25,7 +25,7 @@ ADUDE_PROT = wiring
 
 CFLAGS = -mmcu=$(MCU) -Wall -O2 -DF_CPU=16000000UL -gdwarf-2 
 
-all: $(PROJECT).elf flash size
+all: $(PROJECT).elf size
 
 # use different rule if assembler project source file '$(PROJECT).s' exists...
 ifeq ($(PROJECT).s,$(wildcard $(PROJECT).s))

@@ -17,6 +17,12 @@
 #define BAUD (57600)
 #define UBR_VAL ((F_CPU/16/BAUD)-1)
 
+#define ENC_PORT PINA
+#define ENC_PORT_Port PORTA
+#define ENC_A PINA4
+#define ENC_B PINA5
+#define ENC_A_Port PORTA4
+#define ENC_B_Port PORTA5
 
 //================================================================================
 // Funtion declarations
@@ -26,6 +32,7 @@ int serial_putchar(char ch, FILE *unused);
 void initIO ();
 long getADCBlocking();
 void initTimer();
+int readEncoder();
 
 //================================================================================
 // Static data
@@ -33,19 +40,19 @@ void initTimer();
 static char seconds, minutes, hours;
 volatile static char update = 0;
 
-
 //================================================================================
 // Main routine
 //================================================================================
 //
 int main()
 {	
-	static char s[] = "Hello";
 	static FILE fd_stdout= FDEV_SETUP_STREAM(serial_putchar, NULL, _FDEV_SETUP_WRITE);
 	stdout = &fd_stdout;
 	static FILE fd_lcdout= FDEV_SETUP_STREAM(lcd_putchar, NULL, _FDEV_SETUP_WRITE);
 	FILE *LCD = &fd_lcdout;
 	
+	static int ctr, ctrneu;
+
 	inti_send_buf();
 	initIO();
 	init_lcd();
@@ -53,28 +60,56 @@ int main()
 
 	initTimer();
 
+	LEDS = (1<<ENC_B);
+
 	//fprintf(LCD, "42 is the answer");
-
-	hours = 9;
-	minutes = 38;
-	seconds = 0;
-
-	//sei();
-
-	s[5]='!';
-	s[6]='o';
-	fprintf(LCD,"%s", s);
-
+	fprintf(LCD, "\r\nEncA:%d  ",ctrneu);
 	while(1){
-		
+		ctrneu = readEncoder();
+		if(ctr != ctrneu)
+		{
+			fprintf(LCD, "\r\nEncA:%d  ",ctrneu);
+		}
+		ctr = ctrneu;
  	}
 }
-
-
 
 //================================================================================
 // Functions
 //================================================================================
+
+int readEncoder() 
+{
+	static int n;
+	static enum {A,B,C,D} state;
+
+	char enca = ((ENC_PORT & (1<<ENC_A))>>ENC_A ^ 0x01);
+	char encb = ((ENC_PORT & (1<<ENC_B))>>ENC_B ^ 0x01);
+
+	switch(state)
+	{
+		case A:
+			if( !enca && encb ) {state = B; n++;}
+			if( enca && !encb ) {state = D; n--;}
+			break;
+		case B:
+			if( !enca && !encb ) {state = C; n++;}
+			if( enca && encb ) {state = A; n--;}
+			break;
+		case C:
+			if( enca && !encb ) {state = D; n++;}
+			if( !enca && encb ) {state = B; n--;}
+			break;
+		case D:
+			if( enca && encb ) {state = A; n++;}
+			if( !enca && !encb ) {state = C; n--;}
+			break;
+		default:
+			state = A;
+			break;
+	}
+	return n;
+}
 
 void initTimer()
 {
@@ -116,6 +151,8 @@ int serial_putchar(char ch, FILE *unused)
 void initIO () 
 {
 	DDRC = 0xff;
+	DDRA = 0x00;
+	PORTA |= (1<<ENC_B_Port) | (1<<ENC_A_Port);
 }
 
 
