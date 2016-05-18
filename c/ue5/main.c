@@ -66,11 +66,12 @@ int main()
 	fprintf(LCD, "\r\nEncA:%d  ",ctrneu);
 	while(1){
 		ctrneu = readEncoder();
-		if(ctr != ctrneu)
-		{
-			fprintf(LCD, "\r\nEncA:%d  ",ctrneu);
-		}
-		ctr = ctrneu;
+		LEDS = ctrneu;
+		 if(ctr != ctrneu)
+		 {
+		 	fprintf(LCD, "\r\nEncA:%d  ",ctrneu);
+		 }
+		 ctr = ctrneu;
  	}
 }
 
