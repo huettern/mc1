@@ -11,14 +11,19 @@
 
 //================================================================================
 // Defines
-//================================================================================
-#define LEDS PORTC
-
+//===============================================================================
 #define BAUD (57600)
 #define UBR_VAL ((F_CPU/16/BAUD)-1)
 
 
 #define ADC_MUX_MASK ADC0D
+
+
+#define BUTTON0 0x06
+#define BUTTON1 0x07
+#define LED_PORT  PORTC
+#define LED_HI0  0x00
+#define LED_HI1  0x01
 
 //================================================================================
 // Funtion declarations
@@ -36,6 +41,10 @@ int serial_putchar(char ch, FILE *unused);
 unsigned int getADCBlocking();
 unsigned int getADCVoltage();
 
+unsigned char getButton0();
+unsigned char getButton1();
+void setLED(unsigned int led);
+
 //================================================================================
 // Static data
 //================================================================================
@@ -48,8 +57,14 @@ volatile static unsigned long long tick = 0;
 //
 int main()
 {	
+	unsigned char t1, t2;
 	init();
 	printf("Done Init");
+
+	t1 = getButton0();
+	t2 = getButton1();
+
+	setLED(0xAA);
 
 
 	//fprintf(LCD, "42 is the answer");
@@ -129,7 +144,15 @@ int serial_putchar(char ch, FILE *unused)
  */
 void initIO () 
 {
-
+	//PORT A
+	//Buttons init
+	DDRA	&= ~((1<<BUTTON0)|(1<<BUTTON1)); //buttons auf A.6 & A.7
+	PORTA	|= ((1<<BUTTON0)|(1<<BUTTON1)); //set pullups
+	//LEDs Init
+	DDRA	|= ((1<<LED_HI0)|(1<<LED_HI1));//LEDs auf A.0 & A.1
+	
+	//Port C LED_PORT
+	DDRC = 0xFF; //1=Output
 }
 
 
@@ -178,6 +201,29 @@ void init_timer0_OVF() {
     TIMSK0 |= (0<<OCIE0B) | (0<<OCIE0A) | (1<<TOIE0); //Timer 0 Enabled
 }
 
+unsigned char getButton0(){
+	unsigned char but;
+	but = ((~PINA & (1<<BUTTON0))>>BUTTON0);
+	return but;
+}
+
+unsigned char getButton1(){
+	unsigned char but;
+	but = ((~PINA & (1<<BUTTON1))>>BUTTON1);
+	return but;
+}
+
+void setLED(unsigned int led){
+	unsigned char led_lo;
+	unsigned char led_hi;
+	//set low byte
+	led_lo=(led&0x00FF);
+	LED_PORT=led_lo;
+	//set high bits
+	led_hi=(led>>8);
+	led_hi=(led&0x03);
+	PORTA = (PORTA&0xF6)|led_hi;
+}
 
 //================================================================================
 // Interrupt Functions
