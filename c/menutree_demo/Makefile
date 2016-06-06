@@ -1,22 +1,15 @@
 # Makefile fuer AVR Assembler sources
-# (c) Matthias Meier, 24.2.2016
+# (c) Matthias Meier, 2.3.2016
 
-#PROJECT=$(shell basename $(shell pwd))
-PROJECT=main
+PROJECT=$(shell basename $(shell pwd))
 
-
-OBJS = $(PROJECT).o  \
-../lcd_keypad_m2560/lcd_keypad_m2560.o \
-../lcd_keypad_m2560/lcd_keys.o \
-../menutree_demo/menutree.c
+OBJS = $(PROJECT).o menutree.o  ../lcd_keypad_m2560/lcd_keypad_m2560.o
 
 CC = avr-gcc
-# Fedora 23 avr-libc is broken - use avr-gcc from Fedora 22 mounted on ~/x
-# CC = ~/x/usr/bin/avr-gcc
 
 # for Arduino Mega2560
 MCU = atmega2560	# must be lower case!!
-ADUDE_IF = /dev/ttyS0
+ADUDE_IF = /dev/ttyACM0
 ADUDE_BAUD = 115200
 ADUDE_PROT = wiring
 
@@ -28,7 +21,7 @@ ADUDE_PROT = wiring
 
 CFLAGS = -mmcu=$(MCU) -Wall -O2 -DF_CPU=16000000UL -gdwarf-2 
 
-all: $(PROJECT).elf size
+all: $(PROJECT).elf flash
 
 # use different rule if assembler project source file '$(PROJECT).s' exists...
 ifeq ($(PROJECT).s,$(wildcard $(PROJECT).s))
@@ -51,15 +44,12 @@ endif
 	avr-objdump  -D $<  > $@
 
 flash: $(PROJECT).hex  $(ADUDE_IF)
-	avrdude -F -c $(ADUDE_PROT) -p $(MCU) -P $(ADUDE_IF) -b $(ADUDE_BAUD) -U flash:w:$(PROJECT).hex:i
-	
-size: $(PROJECT).elf
-	avr-size -C --mcu=$(MCU) $(PROJECT).elf
+	avrdude -D -c $(ADUDE_PROT) -p $(MCU) -P $(ADUDE_IF) -b $(ADUDE_BAUD) -U flash:w:$(PROJECT).hex:i
+	#avrdude -F -c $(ADUDE_PROT) -p $(MCU) -P $(ADUDE_IF) -b $(ADUDE_BAUD) -U flash:w:$(PROJECT).hex:i
+
 
 clean:
-	rm -f $(PROJECT).dis $(PROJECT).elf $(PROJECT).hex 
+	rm -f *.o $(PROJECT).dis $(PROJECT).elf $(PROJECT).hex 
 
-.PHONY: clean flash size
+.PHONY: clean flash
 
-
-# 

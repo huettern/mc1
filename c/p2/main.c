@@ -8,22 +8,12 @@
 // Includes
 //================================================================================
 #include "header.h"
+#include "../menutree_demo/menutree.h"
 
 //================================================================================
 // Defines
 //===============================================================================
-#define BAUD (57600)
-#define UBR_VAL ((F_CPU/16/BAUD)-1)
 
-
-#define ADC_MUX_MASK ADC0D
-
-
-#define BUTTON0 4
-#define BUTTON1 5
-#define LED_PORT  PORTC
-#define LED_HI0  0x00
-#define LED_HI1  0x01
 
 //================================================================================
 // Funtion declarations
@@ -45,6 +35,36 @@ unsigned char getButton0();
 unsigned char getButton1();
 void setLED(unsigned int led);
 
+/* Menu */
+void MF_Beep(void);  		
+void MF_CountPort(void);			
+void MF_LoadmenuLED(void);	
+void MF_LoadmenuMain(void);	
+void MF_LEDon(void); 		
+void MF_LEDoff(void);		
+void MF_LEDtoggle(void);		
+void MF_LEDdisp(void);
+
+
+//------------------------------------------------------------------------------
+//Definition of the menu tree by declaring and initializing array variables of type MenuItem_T...
+struct MenuItem_T MainMenu[] = { 
+	{"Beep 0.5s",		 MF_Beep},
+	{"Count on PORTC",	 MF_CountPort},
+	{"Submenu LED...",	 MF_LoadmenuLED},
+};
+
+struct MenuItem_T  SubMenu[] = { 
+	{"set LED on", 		MF_LEDon},
+	{"set LED off", 	MF_LEDoff},
+	{"toggle LED",		MF_LEDtoggle},
+	{"Disp LED value",	MF_LEDdisp},
+	{"Back to Mainmenu",  MF_LoadmenuMain}
+};
+
+//------------------------------------------------------------------------------
+
+
 //================================================================================
 // Static data
 //================================================================================
@@ -57,35 +77,47 @@ volatile static unsigned long long tick = 0;
 //
 int main()
 {	
-	unsigned char t1, t2;
+	// unsigned char t1, t2;
 	init();
 
-	t1 = getButton0();
-	t2 = getButton1();
+	// t1 = getButton0();
+	// t2 = getButton1();
 
 
-	setLED(0x300);
+	// setLED(0x300);
 
-	fprintf(LCD, "42 is the answer");
-	printf("Tick\n");
+	// fprintf(LCD, "42 is the answer");
+	// printf("Tick\n");
 	
-	while(1){
-		if(getButton0())
-		{
-			printf("getButton0\r\n");
-	setLED(0xfff);
+	// while(1){
+	// 	if(getButton0())
+	// 	{
+	// 		printf("getButton0\r\n");
+	// setLED(0xfff);
+	// 	}
+	// 	if(getButton1())
+	// 	{
+	// 		printf("getButton1\r\n");
+	// setLED(0x000);
+	// 	}
+	// 	if(tick >= 250)
+	// 	{
+	// 		tick = 0;
+	// 		printf("Tick\n");
+	// 	}
+ // 	}
+
+	LoadMenu(MainMenu);
+
+	while (1) 
+	{
+		int buttons;
+		_delay_ms(80);			// debounce on key change
+		buttons = (getButton1()<<1) | getButton0();
+		if (buttons) {
+			ProcessMenu(buttons);
 		}
-		if(getButton1())
-		{
-			printf("getButton1\r\n");
-	setLED(0x000);
-		}
-		if(tick >= 250)
-		{
-			tick = 0;
-			printf("Tick\n");
-		}
- 	}
+	}
 }
 
 //================================================================================
@@ -97,9 +129,13 @@ int main()
 void init() 
 {
 	// Init filestream for console and LCD
-	static FILE fd_stdout= FDEV_SETUP_STREAM(serial_putchar, NULL, _FDEV_SETUP_WRITE);
+	// static FILE fd_stdout= FDEV_SETUP_STREAM(serial_putchar, NULL, _FDEV_SETUP_WRITE);
+	// stdout = &fd_stdout;
+	static FILE fd_stdout= FDEV_SETUP_STREAM(lcd_putchar, NULL, _FDEV_SETUP_WRITE);
 	stdout = &fd_stdout;
-	static FILE fd_lcdout= FDEV_SETUP_STREAM(lcd_putchar, NULL, _FDEV_SETUP_WRITE);
+	// static FILE fd_lcdout= FDEV_SETUP_STREAM(lcd_putchar, NULL, _FDEV_SETUP_WRITE);
+	// LCD = &fd_lcdout;
+	static FILE fd_lcdout= FDEV_SETUP_STREAM(serial_putchar, NULL, _FDEV_SETUP_WRITE);
 	LCD = &fd_lcdout;
 	// Send buffer for console
 	inti_send_buf();
@@ -234,6 +270,54 @@ void setLED(unsigned int led){
 	led_hi=(led>>8);
 	led_hi=(led_hi&0x03);
 	PORTA = (PORTA&0xFC)|led_hi;
+}
+
+
+
+//================================================================================
+// Menu functions
+//================================================================================
+ 
+//------------------------------------------------------------------------------
+
+//Implementation of the examples menu functions...
+//Rem: in a real application, implement this and function prototypes in different module(s)
+
+//beep 0.5s at 1kHz
+void MF_Beep(void) {
+	fprintf(LCD, "MF_Beep\r\n");
+}
+
+//count on Port C
+void MF_CountPort(void) {
+} 
+
+// change to submenu LED
+void MF_LoadmenuLED(void) {
+	LoadMenu(SubMenu); 
+}
+
+// change back to main menu
+void MF_LoadmenuMain(void) {
+	LoadMenu(MainMenu); 
+}
+
+// set LED on
+void MF_LEDon(void) {
+}
+
+// set LED off
+void MF_LEDoff(void) {
+}
+
+// toggle LED
+void MF_LEDtoggle(void) { 
+}
+
+// show LED value and return from Submenu
+void MF_LEDdisp(void) { 
+	fprintf(LCD,"\nLED is 42"); 
+	_delay_ms(1000); 
 }
 
 //================================================================================
