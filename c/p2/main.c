@@ -19,8 +19,8 @@
 #define ADC_MUX_MASK ADC0D
 
 
-#define BUTTON0 0x06
-#define BUTTON1 0x07
+#define BUTTON0 4
+#define BUTTON1 5
 #define LED_PORT  PORTC
 #define LED_HI0  0x00
 #define LED_HI1  0x01
@@ -59,16 +59,27 @@ int main()
 {	
 	unsigned char t1, t2;
 	init();
-	printf("Done Init");
 
 	t1 = getButton0();
 	t2 = getButton1();
 
-	setLED(0xAA);
 
+	setLED(0x300);
 
-	//fprintf(LCD, "42 is the answer");
+	fprintf(LCD, "42 is the answer");
+	printf("Tick\n");
+	
 	while(1){
+		if(getButton0())
+		{
+			printf("getButton0\r\n");
+	setLED(0xfff);
+		}
+		if(getButton1())
+		{
+			printf("getButton1\r\n");
+	setLED(0x000);
+		}
 		if(tick >= 250)
 		{
 			tick = 0;
@@ -101,8 +112,8 @@ void init()
 	initLCDADC();
 
 	/* Time init */
-	//init_timer0_COMPA();
-	init_timer0_OVF();
+	init_timer0_COMPA();
+	//init_timer0_OVF();
 
 
 	sei();
@@ -221,8 +232,8 @@ void setLED(unsigned int led){
 	LED_PORT=led_lo;
 	//set high bits
 	led_hi=(led>>8);
-	led_hi=(led&0x03);
-	PORTA = (PORTA&0xF6)|led_hi;
+	led_hi=(led_hi&0x03);
+	PORTA = (PORTA&0xFC)|led_hi;
 }
 
 //================================================================================
